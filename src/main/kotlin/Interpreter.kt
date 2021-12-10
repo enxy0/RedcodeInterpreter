@@ -21,49 +21,23 @@ import theme.LightGrayShade
 import theme.RedcodeTheme
 import utils.RedcodeParser
 
-private class InterpreterState(sourceCode: String) {
-    var program by mutableStateOf(setSourceCode(sourceCode))
-        private set
-    var isExecuting by mutableStateOf(false)
-    var scrollPosition by mutableStateOf(0)
-
-    val currentLine by mutableStateOf(program.commands.indexOfFirst { command -> command.isSelected })
-
-    fun setSourceCode(
-        sourceCode: String
-    ): RedcodeProgram {
-        return try {
-            RedcodeParser.parse(sourceCode)
-        } catch (e: Throwable) {
-            RedcodeProgram.empty()
-        }
-    }
-
-    fun step() {
-        isExecuting = false
-        program = program.step()
-    }
-
-    fun reset() {
-        isExecuting = false
-//        setSourceCode(sourceCode)
-    }
-}
-
 @Composable
+@Preview
 fun Interpreter(
     sourceCode: String,
     modifier: Modifier = Modifier
 ) {
-    val interpreter = remember { InterpreterState(sourceCode) }
-    val scrollState = rememberLazyListState()
-    LaunchedEffect(sourceCode) { interpreter.setSourceCode(sourceCode) }
-    LaunchedEffect(interpreter.scrollPosition) { scrollState.scrollToItem(interpreter.scrollPosition) }
-    LaunchedEffect(interpreter.isExecuting) {
+    var program by remember { mutableStateOf(getRedcodeProgram(sourceCode)) }
+    var execute by remember { mutableStateOf(false) }
+    var jumpTo by remember { mutableStateOf(0) }
+    val lazyListState = rememberLazyListState()
+    LaunchedEffect(sourceCode) { program = getRedcodeProgram(sourceCode) }
+    LaunchedEffect(jumpTo) { lazyListState.scrollToItem(jumpTo) }
+    LaunchedEffect(execute) {
         launch(Dispatchers.Default) {
-            while (interpreter.program.isRunning && interpreter.isExecuting) {
+            while (program.isRunning && execute) {
                 delay(5)
-                interpreter.step()
+                program = program.step()
             }
         }
     }
@@ -75,9 +49,9 @@ fun Interpreter(
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(modifier = Modifier.weight(1f).background(Color.LightGrayShade)) {
                 TableHeaderRow()
-                LazyColumn(state = scrollState) {
+                LazyColumn(state = lazyListState) {
                     item { Spacer(Modifier.height(16.dp)) }
-                    itemsIndexed(interpreter.program.commands) { index, item ->
+                    itemsIndexed(program.commands) { index, item ->
                         TableCommandRow(index, item)
                     }
                 }
@@ -86,22 +60,26 @@ fun Interpreter(
                 modifier = Modifier.weight(0.3f),
                 content = {
                     ButtonsColumn(
-                        jumpTo = interpreter.scrollPosition,
-                        line = interpreter.currentLine,
+                        jumpTo = jumpTo,
+                        line = program.commands.indexOfFirst { command ->
+                            command.isSelected
+                        },
                         onSingleStepClick = {
-                            interpreter.step()
+                            execute = false
+                            program = program.step()
                         },
                         onExecuteClick = {
-                            interpreter.isExecuting = true
+                            execute = true
                         },
                         onStopClick = {
-                            interpreter.isExecuting = false
+                            execute = false
                         },
                         onResetClick = {
-                            interpreter.reset()
+                            execute = false
+                            program = getRedcodeProgram(sourceCode)
                         },
                         onJumpToClick = { position ->
-                            interpreter.scrollPosition = position
+                            jumpTo = position
                         }
                     )
                 }
@@ -192,16 +170,18 @@ private fun ButtonsColumn(
 }
 
 @Composable
-fun ActionButton(text: String, onClick: () -> Unit = {}) {
+fun ActionButton(text: String, onClick: () -> Unit) {
     OutlinedButton(onClick, shape = RectangleShape, modifier = Modifier.fillMaxWidth()) {
         Text(text)
     }
 }
 
-@Composable
-@Preview
-private fun PreviewInterpreter() {
-    RedcodeTheme {
-        InterpreterState(TestUtils.simpleProgram())
+fun getRedcodeProgram(
+    sourceCode: String
+): RedcodeProgram {
+    return try {
+        RedcodeParser.parse(sourceCode)
+    } catch (e: Throwable) {
+        RedcodeProgram.empty()
     }
 }
