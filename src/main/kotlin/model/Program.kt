@@ -18,7 +18,7 @@ data class RedcodeProgram(
             .takeIf { it >= 0 }
             ?: return this
         // Execute command
-        var nextIndex = currentIndex + 1
+        var nextIndex = getSafeIndex(currentIndex + 1)
         val currentCommand = localCommands[currentIndex]
         val (indexA, commandA) = getCommandByAddr(localCommands, currentIndex, currentCommand.operandA)
         val (indexB, commandB) = getCommandByAddr(localCommands, currentIndex, currentCommand.operandB)
@@ -57,12 +57,10 @@ data class RedcodeProgram(
             }
             is Command.Jmp -> {
                 if (isValidIndex(indexA)) {
-                    // put the same command on same index to invalidate changes (hacky way)
-                    localCommands[indexA] = commandA
+                    nextIndex = indexA
                 } else {
                     println("step: $currentCommand cannot be executed for index: $indexA")
                 }
-                nextIndex = indexA
             }
             is Command.Jmz -> TODO()
             is Command.Mod -> TODO()
@@ -96,12 +94,12 @@ data class RedcodeProgram(
             -1 to Command.Dat(addr)
         }
         is Address.Direct -> {
-            val index = getIndex(currentIndex + addr.number)
+            val index = getSafeIndex(currentIndex + addr.number)
             val command = commands[index]
             index to command.copy()
         }
         is Address.BFieldIndirect -> {
-            val tempIndex = getIndex(currentIndex + addr.number)
+            val tempIndex = getSafeIndex(currentIndex + addr.number)
             val tempCommand = commands[tempIndex]
             when (addr) {
                 is Address.BFieldIndirect.WithPredecrement -> {
@@ -109,7 +107,7 @@ data class RedcodeProgram(
                         operandB = tempCommand.operandB.copy(tempCommand.operandB.number - 1)
                     )
                     commands[tempIndex] = newCommand
-                    val index = getIndex(tempIndex + newCommand.operandB.number)
+                    val index = getSafeIndex(tempIndex + newCommand.operandB.number)
                     val command = commands[index]
                     index to command.copy()
                 }
@@ -118,12 +116,12 @@ data class RedcodeProgram(
                         operandB = tempCommand.operandB.copy(tempCommand.operandB.number + 1)
                     )
                     commands[tempIndex] = newCommand
-                    val index = getIndex(tempIndex + tempCommand.operandB.number)
+                    val index = getSafeIndex(tempIndex + tempCommand.operandB.number)
                     val command = commands[index]
                     index to command.copy()
                 }
                 else -> {
-                    val index = getIndex(tempIndex + tempCommand.operandB.number)
+                    val index = getSafeIndex(tempIndex + tempCommand.operandB.number)
                     val command = commands[index]
                     index to command.copy()
                 }
@@ -131,8 +129,8 @@ data class RedcodeProgram(
         }
     }
 
-    private fun getIndex(index: Int): Int {
-        val safeIndex = index % (COMMANDS_MAX - 1)
+    private fun getSafeIndex(index: Int): Int {
+        val safeIndex = index % COMMANDS_MAX
         return if (safeIndex < 0) COMMANDS_MAX + index else safeIndex
     }
 

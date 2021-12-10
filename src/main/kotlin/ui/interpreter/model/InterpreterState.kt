@@ -31,7 +31,7 @@ class InterpreterState {
         currentLine = getCurrentLineInternal(program)
     }
 
-    suspend fun execute(delay: Long = 5L) = withContext(Dispatchers.Default) {
+    suspend fun execute(delay: Long = 0L) = withContext(Dispatchers.Default) {
         while (program.isRunning && isInExecuteMode) {
             delay(delay)
             step()
