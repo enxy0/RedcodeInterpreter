@@ -1,4 +1,4 @@
-package utils
+package common.utils
 
 import model.Address
 import model.Command
@@ -7,13 +7,15 @@ import model.RedcodeProgram.Companion.COMMANDS_MAX
 
 object RedcodeParser {
 
+    private const val COMMANDS_COMMON_SIZE = 20
+
     private val emptyCommands: List<Command> by lazy {
         generateSequence { Command.Dat.default() }.take(COMMANDS_MAX).toList()
     }
 
     fun parse(text: String): RedcodeProgram {
         var org: Command.Org? = null
-        val commands = ArrayList<Command>(COMMANDS_MAX)
+        val commands = ArrayList<Command>(COMMANDS_COMMON_SIZE)
         val lines = text.splitToSequence('\n').filterNot(String::isEmpty).map(String::trim)
         for (line in lines) {
             commands += when {

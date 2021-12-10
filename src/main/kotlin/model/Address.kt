@@ -6,6 +6,7 @@ sealed class Address(
 ) {
     companion object {
         val regex = "[$<>#@]".toRegex()
+        const val all = "#, $, <, >, @"
     }
 
     abstract fun copy(number: Int): Address

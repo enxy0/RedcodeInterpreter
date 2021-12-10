@@ -1,8 +1,8 @@
 package model
 
-import utils.RegexUtils
-import utils.RegexUtils.doubleOperandRegex
-import utils.RegexUtils.operandRegex
+import common.utils.RegexUtils
+import common.utils.RegexUtils.doubleOperandRegex
+import common.utils.RegexUtils.operandRegex
 
 sealed class Command(
     open val name: String,
@@ -10,6 +10,10 @@ sealed class Command(
     open val operandB: Address,
     open var isSelected: Boolean = false
 ) {
+
+    companion object {
+        const val all = "ORG, DAT, MOV, ADD, SUB, MUL, DIV, JMZ, JMP, MOD"
+    }
 
     abstract fun copy(operandA: Address = this.operandA, operandB: Address = this.operandB): Command
 
