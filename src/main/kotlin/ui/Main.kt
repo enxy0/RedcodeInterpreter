@@ -35,7 +35,10 @@ fun App() {
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
+    Window(
+        title = "Redcode Interpreter by Nikita Bushuev",
+        onCloseRequest = ::exitApplication
+    ) {
         App()
     }
 }
