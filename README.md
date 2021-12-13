@@ -28,4 +28,4 @@
 * [Jetpack Compose Desktop](https://github.com/JetBrains/compose-jb)
 
 ## Screenshots
-<img src="https://raw.githubusercontent.com/enxy0/RedcodeInterpreter/master/.github/main.png?token=AID63I5C2B25QM5DDXGLY7TBXPP5G">
+<img src="https://raw.githubusercontent.com/enxy0/RedcodeInterpreter/master/.github/main.png">
