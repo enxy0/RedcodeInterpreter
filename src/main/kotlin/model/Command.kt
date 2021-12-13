@@ -2,7 +2,7 @@ package model
 
 import common.utils.RegexUtils
 import common.utils.RegexUtils.doubleOperandRegex
-import common.utils.RegexUtils.operandRegex
+import common.utils.RegexUtils.optionalDoubleOperandRegex
 
 sealed class Command(
     open val name: String,
@@ -12,7 +12,7 @@ sealed class Command(
 ) {
 
     companion object {
-        const val all = "ORG, DAT, MOV, ADD, SUB, MUL, DIV, JMZ, JMP, MOD"
+        const val all = "ORG, DAT, MOV, ADD, SUB, MUL, DIV, JMZ, JMP, MOD, JMP, JMZ, JMN, DJN, CMP, SLT"
     }
 
     abstract fun copy(operandA: Address = this.operandA, operandB: Address = this.operandB): Command
@@ -40,7 +40,7 @@ sealed class Command(
     ) : Command(name = NAME, operandA = operandA, operandB = operandB) {
         companion object {
             const val NAME = "DAT"
-            val regex = "$NAME ${RegexUtils.anyNumberRegex}".toRegex(RegexOption.IGNORE_CASE)
+            val regex = "$NAME $optionalDoubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
 
             fun default() = Dat(Address.Immediate(0), Address.Immediate(0))
         }
@@ -144,14 +144,46 @@ sealed class Command(
         )
     }
 
+    data class Jmn(
+        override val operandA: Address,
+        override val operandB: Address,
+        override var isSelected: Boolean = false
+    ) : Command(name = NAME, operandA = operandA, operandB = operandB) {
+        companion object {
+            const val NAME = "JMN"
+            val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
+        }
+
+        override fun copy(operandA: Address, operandB: Address): Command = Jmn(
+            operandA = operandA,
+            operandB = operandB
+        )
+    }
+
+    data class Djn(
+        override val operandA: Address,
+        override val operandB: Address,
+        override var isSelected: Boolean = false
+    ) : Command(name = NAME, operandA = operandA, operandB = operandB) {
+        companion object {
+            const val NAME = "DJN"
+            val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
+        }
+
+        override fun copy(operandA: Address, operandB: Address): Command = Djn(
+            operandA = operandA,
+            operandB = operandB
+        )
+    }
+
     data class Jmp(
         override val operandA: Address,
-        override val operandB: Address.Direct = Address.Direct(0),
+        override val operandB: Address = Address.Direct(0),
         override var isSelected: Boolean = false
     ) : Command(name = NAME, operandA = operandA, operandB = operandB) {
         companion object {
             const val NAME = "JMP"
-            val regex = "$NAME $operandRegex".toRegex(RegexOption.IGNORE_CASE)
+            val regex = "$NAME $optionalDoubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
         }
 
         override fun copy(operandA: Address, operandB: Address): Command = Jmp(
@@ -171,6 +203,38 @@ sealed class Command(
         }
 
         override fun copy(operandA: Address, operandB: Address): Command = Mod(
+            operandA = operandA,
+            operandB = operandB
+        )
+    }
+
+    data class Cmp(
+        override val operandA: Address,
+        override val operandB: Address,
+        override var isSelected: Boolean = false
+    ) : Command(name = NAME, operandA = operandA, operandB = operandB) {
+        companion object {
+            const val NAME = "CMP"
+            val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
+        }
+
+        override fun copy(operandA: Address, operandB: Address): Command = Cmp(
+            operandA = operandA,
+            operandB = operandB
+        )
+    }
+
+    data class Slt(
+        override val operandA: Address,
+        override val operandB: Address,
+        override var isSelected: Boolean = false
+    ) : Command(name = NAME, operandA = operandA, operandB = operandB) {
+        companion object {
+            const val NAME = "SLT"
+            val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
+        }
+
+        override fun copy(operandA: Address, operandB: Address): Command = Slt(
             operandA = operandA,
             operandB = operandB
         )

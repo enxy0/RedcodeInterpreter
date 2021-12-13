@@ -29,9 +29,12 @@ object RedcodeParser {
                     continue
                 }
                 line matches Command.Dat.regex -> {
-                    val (_, operand) = parseLine(line)
+                    val (_, operandA, operandB) = parseLine(line)
                     Command.Dat(
-                        operandB = parseAddressing(operand) { number ->
+                        operandA = parseAddressing(operandA.takeIf { operandB.isNotBlank() }) { number ->
+                            Address.Immediate(number)
+                        } as? Address.Immediate ?: Address.Immediate(0),
+                        operandB = parseAddressing(operandB.ifBlank { operandA }) { number ->
                             Address.Immediate(number)
                         } as Address.Immediate
                     )
@@ -39,58 +42,85 @@ object RedcodeParser {
                 line matches Command.Move.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Move(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 line matches Command.Add.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Add(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 line matches Command.Sub.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Sub(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 line matches Command.Mul.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Mul(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 line matches Command.Div.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Div(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 line matches Command.Mod.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Mod(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 line matches Command.Jmp.regex -> {
-                    val (_, operandA) = parseLine(line)
+                    val (_, operandA, operandB) = parseLine(line)
                     Command.Jmp(
-                        operandA = parseAddressing(operandA) { number ->
-                            Address.Direct(number)
-                        } as Address.Direct
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB) ?: Address.Direct(0)
                     )
                 }
                 line matches Command.Jmz.regex -> {
                     val (_, operandA, operandB) = parseLine(line)
                     Command.Jmz(
-                        operandA = parseAddressing(operandA),
-                        operandB = parseAddressing(operandB)
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
+                    )
+                }
+                line matches Command.Jmn.regex -> {
+                    val (_, operandA, operandB) = parseLine(line)
+                    Command.Jmn(
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
+                    )
+                }
+                line matches Command.Djn.regex -> {
+                    val (_, operandA, operandB) = parseLine(line)
+                    Command.Djn(
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
+                    )
+                }
+                line matches Command.Cmp.regex -> {
+                    val (_, operandA, operandB) = parseLine(line)
+                    Command.Cmp(
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
+                    )
+                }
+                line matches Command.Slt.regex -> {
+                    val (_, operandA, operandB) = parseLine(line)
+                    Command.Slt(
+                        operandA = parseAddressing(operandA)!!,
+                        operandB = parseAddressing(operandB)!!
                     )
                 }
                 else -> {
@@ -104,25 +134,32 @@ object RedcodeParser {
         return RedcodeProgram(commands + emptyCommands.takeLast(COMMANDS_MAX - commands.size))
     }
 
-    private fun parseLine(text: String): List<String> = text.split(", ", " ", ",").filter(String::isNotBlank)
+    private fun parseLine(text: String): List<String> =
+        text.split(", ", " ", ",")
+            .filter(String::isNotBlank)
+            .let { it + generateSequence { "" }.take((3 - it.size).coerceAtLeast(0)) }
 
     private fun parseAddressing(
-        text: String,
+        text: String?,
         default: (Int) -> Address = { Address.Direct(it) }
-    ): Address {
-        val (addressing, number) = if (Address.regex in text) {
-            text.first() to text.drop(1).toInt()
-        } else {
-            "" to text.toInt()
-        }
-        return when (addressing) {
-            '#' -> Address.Immediate(number)
-            '@' -> Address.BFieldIndirect(number)
-            '<' -> Address.BFieldIndirect.WithPredecrement(number)
-            '>' -> Address.BFieldIndirect.WithPostincrement(number)
-            '$' -> Address.Direct(number)
-            "" -> default(number)
-            else -> error("Unsupported addressing or invalid code")
+    ): Address? = text?.let {
+        try {
+            val (addressing, number) = if (Address.regex in text) {
+                text.first() to text.drop(1).toInt()
+            } else {
+                "" to text.toInt()
+            }
+            when (addressing) {
+                '#' -> Address.Immediate(number)
+                '@' -> Address.BFieldIndirect(number)
+                '<' -> Address.BFieldIndirect.WithPredecrement(number)
+                '>' -> Address.BFieldIndirect.WithPostincrement(number)
+                '$' -> Address.Direct(number)
+                "" -> default(number)
+                else -> error("Unsupported addressing or invalid code")
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }

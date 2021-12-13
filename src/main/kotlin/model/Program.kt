@@ -22,53 +22,63 @@ data class RedcodeProgram(
         val currentCommand = localCommands[currentIndex]
         val (indexA, commandA) = getCommandByAddr(localCommands, currentIndex, currentCommand.operandA)
         val (indexB, commandB) = getCommandByAddr(localCommands, currentIndex, currentCommand.operandB)
+        var shouldCancelExecution = false
         when (currentCommand) {
             is Command.Add -> {
-                if (isValidIndex(indexB)) {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number + commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
-                } else {
-                    println("step: $currentCommand cannot be executed for index: $indexB")
-                }
+                val operandB = commandB.operandB.copy(commandB.operandB.number + commandA.operandB.number)
+                localCommands[indexB] = commandB.copy(operandB = operandB)
             }
             is Command.Sub -> {
-                if (isValidIndex(indexB)) {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number - commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
-                } else {
-                    println("step: $currentCommand cannot be executed for index: $indexB")
-                }
+                val operandB = commandB.operandB.copy(commandB.operandB.number - commandA.operandB.number)
+                localCommands[indexB] = commandB.copy(operandB = operandB)
             }
             is Command.Mul -> {
-                if (isValidIndex(indexB)) {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number * commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
-                } else {
-                    println("step: $currentCommand cannot be executed for index: $indexB")
-                }
+                val operandB = commandB.operandB.copy(commandB.operandB.number * commandA.operandB.number)
+                localCommands[indexB] = commandB.copy(operandB = operandB)
             }
             is Command.Div -> {
-                if (isValidIndex(indexB)) {
+                if (commandA.operandB.number != 0) {
                     val operandB = commandB.operandB.copy(commandB.operandB.number / commandA.operandB.number)
                     localCommands[indexB] = commandB.copy(operandB = operandB)
                 } else {
-                    println("step: $currentCommand cannot be executed for index: $indexB")
+                    shouldCancelExecution = true
                 }
+            }
+            is Command.Mod -> {
+                val operandB = commandB.operandB.copy(commandB.operandB.number % commandA.operandB.number)
+                localCommands[indexB] = commandB.copy(operandB = operandB)
             }
             is Command.Jmp -> {
-                if (isValidIndex(indexA)) {
+                nextIndex = indexA
+            }
+            is Command.Jmz -> {
+                if (commandB.operandB.number == 0) {
                     nextIndex = indexA
-                } else {
-                    println("step: $currentCommand cannot be executed for index: $indexA")
                 }
             }
-            is Command.Jmz -> TODO()
-            is Command.Mod -> TODO()
+            is Command.Jmn -> {
+                if (commandB.operandB.number != 0) {
+                    nextIndex = indexA
+                }
+            }
+            is Command.Djn -> {
+                if (commandB.operandB.number - 1 != 0) {
+                    nextIndex = indexA
+                }
+            }
             is Command.Move -> {
-                if (isValidIndex(indexB)) {
-                    localCommands[indexB] = commandA
-                } else {
-                    println("step: $currentCommand cannot be executed for index: $indexB")
+                localCommands[indexB] = commandA
+            }
+            is Command.Cmp -> {
+                val index = currentIndex + 2
+                if (commandA.operandB.number == commandB.operandB.number) {
+                    nextIndex = index
+                }
+            }
+            is Command.Slt -> {
+                val index = currentIndex + 2
+                if (commandA.operandB.number < commandB.operandB.number) {
+                    nextIndex = index
                 }
             }
             is Command.Dat -> return this
@@ -77,7 +87,11 @@ data class RedcodeProgram(
         // Set next selected command
         if (isValidIndex(nextIndex)) {
             for ((index, command) in localCommands.withIndex()) {
-                command.isSelected = index == nextIndex && command !is Command.Dat
+                if (index == nextIndex && command !is Command.Dat && !shouldCancelExecution) {
+                    localCommands[index] = command.copy().apply { this.isSelected = true }
+                } else {
+                    command.isSelected = false
+                }
             }
         }
         return this.copy(commands = localCommands)

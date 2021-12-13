@@ -1,6 +1,7 @@
 package ui.interpreter
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -152,7 +153,9 @@ private fun ColumnScope.ButtonsColumn(
             text = "LINE: ${actions.currentLine}",
             style = RedcodeTheme.typography.body2,
             fontSize = 13.sp,
-            modifier = modifier
+            modifier = modifier.clickable {
+                actions.onJumpToClick(actions.currentLine)
+            },
         )
     }
     Spacer(Modifier.weight(1f))
