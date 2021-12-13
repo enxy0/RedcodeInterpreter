@@ -22,7 +22,6 @@
 * `DJN` - decrement and jump if not zero (decrements a number by one, and jumps unless the result is 0)
 * `CMP` - skip if equal (compares two instructions, and skips the next instruction if they are equal)
 * `SLT` - skip if lower than (compares two values, and skips the next instruction if the first is lower than the second)
-  Supported commands: `ORG, DAT, MOV, ADD, SUB, MUL, DIV, JMZ, JMP, MOD, JMP, JMZ, JMN, DJN, CMP, SLT`.
 
 ## Built with
 * [Kotlin](https://kotlinlang.org/)
