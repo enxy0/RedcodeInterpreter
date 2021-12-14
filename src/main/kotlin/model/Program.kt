@@ -87,7 +87,13 @@ data class RedcodeProgram(
                 }
             }
             is Command.Djn -> {
-                if (commandB.operandB.number - 1 != 0) {
+                val number = commandB.operandB.number - 1
+                if (indexB == -1) {
+                    localCommands[currentIndex] = currentCommand.copy(operandB = currentCommand.operandB.copy(number))
+                } else {
+                    localCommands[indexB] = commandB.copy(operandB = commandB.operandB.copy(number))
+                }
+                if (number != 0) {
                     nextIndex = indexA
                 }
             }
