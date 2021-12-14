@@ -7,3 +7,6 @@ val Color.Companion.LightGrayShade
 
 val Color.Companion.PinkCodeKeyword
     get() = Color(0xFFC678DD)
+
+val Color.Companion.BlueCodeKeyword
+    get() = Color(0xFF448AFF)
