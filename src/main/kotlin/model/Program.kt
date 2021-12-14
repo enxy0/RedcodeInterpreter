@@ -25,31 +25,56 @@ data class RedcodeProgram(
         var shouldCancelExecution = false
         when (currentCommand) {
             is Command.Add -> {
-                val operandB = commandB.operandB.copy(commandB.operandB.number + commandA.operandB.number)
-                localCommands[indexB] = commandB.copy(operandB = operandB)
+                if (indexB == -1) {
+                    val operandB = currentCommand.operandB.copy(currentCommand.operandB.number + commandA.operandB.number)
+                    localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
+                } else {
+                    val operandB = commandB.operandB.copy(commandB.operandB.number + commandA.operandB.number)
+                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                }
             }
             is Command.Sub -> {
-                val operandB = commandB.operandB.copy(commandB.operandB.number - commandA.operandB.number)
-                localCommands[indexB] = commandB.copy(operandB = operandB)
+                if (indexB == -1) {
+                    val operandB = currentCommand.operandB.copy(currentCommand.operandB.number - commandA.operandB.number)
+                    localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
+                } else {
+                    val operandB = commandB.operandB.copy(commandB.operandB.number - commandA.operandB.number)
+                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                }
             }
             is Command.Mul -> {
-                val operandB = commandB.operandB.copy(commandB.operandB.number * commandA.operandB.number)
-                localCommands[indexB] = commandB.copy(operandB = operandB)
+                if (indexB == -1) {
+                    val operandB = currentCommand.operandB.copy(currentCommand.operandB.number * commandA.operandB.number)
+                    localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
+                } else {
+                    val operandB = commandB.operandB.copy(commandB.operandB.number * commandA.operandB.number)
+                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                }
             }
             is Command.Div -> {
                 if (commandA.operandB.number != 0) {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number / commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                    if (indexB == -1) {
+                        val operandB = currentCommand.operandB.copy(currentCommand.operandB.number / commandA.operandB.number)
+                        localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
+                    } else {
+                        val operandB = commandB.operandB.copy(commandB.operandB.number / commandA.operandB.number)
+                        localCommands[indexB] = commandB.copy(operandB = operandB)
+                    }
                 } else {
                     shouldCancelExecution = true
                 }
             }
             is Command.Mod -> {
-                val operandB = commandB.operandB.copy(commandB.operandB.number % commandA.operandB.number)
-                localCommands[indexB] = commandB.copy(operandB = operandB)
+                if (indexB == -1) {
+                    val operandB = currentCommand.operandB.copy(currentCommand.operandB.number % commandA.operandB.number)
+                    localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
+                } else {
+                    val operandB = commandB.operandB.copy(commandB.operandB.number % commandA.operandB.number)
+                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                }
             }
             is Command.Jmp -> {
-                nextIndex = indexA
+                nextIndex = if (indexA == -1) currentIndex else indexA
             }
             is Command.Jmz -> {
                 if (commandB.operandB.number == 0) {
