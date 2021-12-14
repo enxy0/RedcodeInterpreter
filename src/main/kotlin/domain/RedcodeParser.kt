@@ -1,4 +1,4 @@
-package common.utils
+package domain
 
 import model.Address
 import model.Command

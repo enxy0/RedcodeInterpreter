@@ -1,3 +1,5 @@
+package ui.editor
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import domain.CodeHighlighter
 import theme.LightGrayShade
 import theme.RedcodeTheme
 
@@ -38,7 +45,15 @@ fun Editor(
                 unfocusedIndicatorColor = Color.Transparent
             ),
             textStyle = RedcodeTheme.typography.body2,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            visualTransformation = ColorsTransformation()
         )
     }
+}
+
+class ColorsTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText = TransformedText(
+        CodeHighlighter.highlight(text.toString()),
+        OffsetMapping.Identity
+    )
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import common.utils.TestUtils
 import theme.RedcodeTheme
+import ui.editor.Editor
 import ui.interpreter.Interpreter
 
 @Composable

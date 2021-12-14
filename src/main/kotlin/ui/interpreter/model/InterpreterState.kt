@@ -3,7 +3,7 @@ package ui.interpreter.model
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import common.utils.RedcodeParser
+import domain.RedcodeParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
