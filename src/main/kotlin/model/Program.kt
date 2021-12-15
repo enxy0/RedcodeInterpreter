@@ -29,8 +29,10 @@ data class RedcodeProgram(
                     val operandB = currentCommand.operandB.copy(currentCommand.operandB.number + commandA.operandB.number)
                     localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
                 } else {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number + commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                    localCommands[indexB] = commandB.copy(
+                        operandB = commandB.operandB.copy(commandB.operandB.number + commandA.operandB.number),
+                        operandA = commandB.operandA.copy(commandB.operandA.number + commandA.operandA.number)
+                    )
                 }
             }
             is Command.Sub -> {
@@ -38,8 +40,10 @@ data class RedcodeProgram(
                     val operandB = currentCommand.operandB.copy(currentCommand.operandB.number - commandA.operandB.number)
                     localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
                 } else {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number - commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                    localCommands[indexB] = commandB.copy(
+                        operandB = commandB.operandB.copy(commandB.operandB.number - commandA.operandB.number),
+                        operandA = commandB.operandA.copy(commandB.operandA.number - commandA.operandA.number)
+                    )
                 }
             }
             is Command.Mul -> {
@@ -47,8 +51,10 @@ data class RedcodeProgram(
                     val operandB = currentCommand.operandB.copy(currentCommand.operandB.number * commandA.operandB.number)
                     localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
                 } else {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number * commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                    localCommands[indexB] = commandB.copy(
+                        operandB = commandB.operandB.copy(commandB.operandB.number * commandA.operandB.number),
+                        operandA = commandB.operandA.copy(commandB.operandA.number * commandA.operandA.number)
+                    )
                 }
             }
             is Command.Div -> {
@@ -57,8 +63,10 @@ data class RedcodeProgram(
                         val operandB = currentCommand.operandB.copy(currentCommand.operandB.number / commandA.operandB.number)
                         localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
                     } else {
-                        val operandB = commandB.operandB.copy(commandB.operandB.number / commandA.operandB.number)
-                        localCommands[indexB] = commandB.copy(operandB = operandB)
+                        localCommands[indexB] = commandB.copy(
+                            operandB = commandB.operandB.copy(commandB.operandB.number / commandA.operandB.number),
+                            operandA = commandB.operandA.copy(commandB.operandA.number / commandA.operandA.number)
+                        )
                     }
                 } else {
                     shouldCancelExecution = true
@@ -69,8 +77,10 @@ data class RedcodeProgram(
                     val operandB = currentCommand.operandB.copy(currentCommand.operandB.number % commandA.operandB.number)
                     localCommands[currentIndex] = currentCommand.copy(operandB = operandB)
                 } else {
-                    val operandB = commandB.operandB.copy(commandB.operandB.number % commandA.operandB.number)
-                    localCommands[indexB] = commandB.copy(operandB = operandB)
+                    localCommands[indexB] = commandB.copy(
+                        operandB = commandB.operandB.copy(commandB.operandB.number % commandA.operandB.number),
+                        operandA = commandB.operandA.copy(commandB.operandA.number % commandA.operandA.number)
+                    )
                 }
             }
             is Command.Jmp -> {
