@@ -90,7 +90,7 @@ sealed class Command(
             val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
         }
 
-        override fun copy(operandA: Address, operandB: Address): Command = Add(
+        override fun copy(operandA: Address, operandB: Address): Command = Sub(
             operandA = operandA,
             operandB = operandB
         )
@@ -106,7 +106,7 @@ sealed class Command(
             val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
         }
 
-        override fun copy(operandA: Address, operandB: Address): Command = Add(
+        override fun copy(operandA: Address, operandB: Address): Command = Mul(
             operandA = operandA,
             operandB = operandB
         )
@@ -122,7 +122,7 @@ sealed class Command(
             val regex = "$NAME $doubleOperandRegex".toRegex(RegexOption.IGNORE_CASE)
         }
 
-        override fun copy(operandA: Address, operandB: Address): Command = Add(
+        override fun copy(operandA: Address, operandB: Address): Command = Div(
             operandA = operandA,
             operandB = operandB
         )
